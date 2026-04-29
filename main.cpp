@@ -1,10 +1,10 @@
 #include <QApplication>
-#include "checkergame.h"
+#include "gamewidget.h"
 
-int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
-    CheckerGame w;
-    w.setWindowTitle("纯C++能量系统国际跳棋");
-    w.show();
-    return a.exec();
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+    GameWidget game;
+    game.show();
+    return app.exec();
 }
