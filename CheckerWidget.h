@@ -3,28 +3,44 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QPixmap>
 #include "GameEngine.h"
 
-// UI 层：继承 QWidget 以实现界面的绘制和事件捕获
+// 负责整个界面的绘制与事件分发，实现了菜单、规则和游戏的切换
 class CheckerWidget : public QWidget {
-    Q_OBJECT // 必备宏，允许使用 Qt 的核心机制如信号与槽
+    Q_OBJECT // 允许使用 Qt 信号槽机制
 
 public:
-    CheckerWidget(QWidget *parent = nullptr); // 默认构造函数
+    CheckerWidget(QWidget *parent = nullptr);
 
 protected:
-    // 覆盖重写 QWidget 的三大核心虚函数
-    void paintEvent(QPaintEvent *event) override;       // 负责视觉呈现（画出棋盘与棋子）
-    void mousePressEvent(QMouseEvent *event) override;  // 监听并处理鼠标点击事件
-    void keyPressEvent(QKeyEvent *event) override;      // 监听键盘输入（如 S 键切换模式）
+    void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
-    GameEngine engine;              // Model：包含全盘数据和规则的黑盒引擎
-    int selRow = -1, selCol = -1;   // UI状态记录：当前高亮的选中棋子 (-1 表示未选中)
-    bool aiMode = true;             // UI状态记录：标记开启的是人机模式还是人人模式
+    GameEngine engine;
+    DisplayState currentState = Menu;             // UI状态机：默认主菜单
+    int selRow = -1, selCol = -1;                 // 选中的棋子
+    bool aiMode = true;                           // 对战模式开关
 
-    // 定时器调用的 AI 延迟走棋辅助函数
-    void aiMove();
+    // --- 新增：玉面手雷王爆炸动画状态变量 ---
+    bool isExploding = false;    // 标记当前是否正在播放手雷王特效
+    int explodeR = -1;           // 爆炸中心的行坐标
+    int explodeC = -1;           // 爆炸中心的列坐标
+    int explodeFrame = 0;        // 动画帧计数器（0~30）
+    QTimer* explodeTimer;        // 驱动动画的定时器
+    QPixmap bombImage;           // 存储加载进来的恶搞表情包
+
+    // 三大界面绘制分离器
+    void drawMenu(QPainter &p);
+    void drawRules(QPainter &p);
+    void drawGame(QPainter &p);
+
+    void aiMove(); // AI 驱动函数
+
+private slots:
+    void updateExplosion(); // 每一帧更新爆炸画面的槽函数
 };
 
 #endif // CHECKERWIDGET_H

@@ -3,42 +3,50 @@
 
 #include "GameTypes.h"
 #include <vector>
-#include <utility>
 
-// 核心引擎类：处理跳棋的所有规则、能量机制与AI计算
+// 核心引擎类：纯粹的数据与规则计算大脑，不涉及任何图形界面绘制
 class GameEngine {
 public:
-    int board[8][8];      // 8x8 棋盘二维数组，存储 PieceType
-    int energy[8][8];     // 8x8 能量二维数组，存储每个棋子的当前能量值
-    int turn;             // 记录当前轮到哪一方走棋 (1:红方玩家, 2:黑方/AI)
-    bool mustCapture;     // 标记当前回合是否存在“必须吃子”的强制规则约束
-    GameStatus status;    // 游戏当前状态（进行中、红胜、黑胜）
-    int comboCount;       // 连跳计数器，用于触发能量积攒的加成机制
+    int board[8][8];                  // 8x8 物理棋盘矩阵
+    int energy[8][8];                 // 8x8 能量矩阵，存储棋子当前能量 (0~5)
 
-    GameEngine();         // 构造函数
-    void reset();         // 初始化/重置游戏到开局状态
+    int turn;                         // 当前行动方 (1:红方/玩家, 2:黑方/电脑)
+    bool mustCapture;                 // 核心规则：标记当前是否“必须吃子”
+    GameStatus status;                // 当前游戏胜负状态
+    int comboCount;                   // 连击计数器：用于连跳额外能量奖励
+    AIDifficulty aiDifficulty = Hard; // 默认将 AI 设置为困难推演模式
 
-    // 验证从 (r1, c1) 移动到 (r2, c2) 是否符合规则，并通过引用返回是否吃子或触发特殊移动
+    GameEngine();
+    void reset();
+
+    // 核心物理与移动接口
     bool isValidMove(int r1, int c1, int r2, int c2, bool &isCap, bool &isSpecial) const;
-    // 检查指定坐标的棋子当前是否能吃掉敌方棋子
     bool canCapture(int r, int c) const;
-    // 实际执行移动逻辑（会更新棋盘、能量并判断是否连跳/回合结束），返回该棋子是否能继续连跳
     bool performMove(int r1, int c1, int r2, int c2);
-    // 生成 AI 的合法走步，并写入参数 r1,c1 (起点) 和 r2,c2 (终点)
-    bool generateAIMove(int &r1, int &c1, int &r2, int &c2, int currentSelRow = -1, int currentSelCol = -1) const;
+
+    // AI 大脑接口：生成 AI 的走步。actionType 区分动作：0=普通移动/吃子, 1=玉面手雷王, 2=主动升王
+    bool generateAIMove(int &r1, int &c1, int &r2, int &c2, int &actionType, int currentSelRow = -1, int currentSelCol = -1) const;
+
+    // --- 战术大招接口 ---
+    // 技能 1：玉面手雷王（满5点能量触发，抹杀自身，摧毁周围3x3所有敌人）
+    bool performJadeGrenade(int r, int c);
+
+    // 技能 2：主动原地重构升王（满5点能量触发，消耗本回合直接升王）
+    bool performActivePromotion(int r, int c);
 
 private:
-    void initBoard();                               // 将棋子按照初始规则摆放
-    bool isOpponent(int r, int c, int p) const;     // 判断目标坐标上的棋子是否为玩家 p 的敌方
-    bool hasAnyCapture(int p) const;                // 全局扫描：玩家 p 是否有任何一颗棋子可以吃子
-    bool hasAnyMove(int p) const;                   // 全局扫描：玩家 p 是否存在任何合法的移动（若无则判负）
-    void applyEnergyShockwave(int r, int c);        // 满能量吃子时触发：削减周围敌军的能量
-    void promote(int r, int c);                     // 检查并执行普通棋子到达底线晋升为“王”的逻辑
-    void checkVictory();                            // 检查对局是否结束（某方无路可走）
+    void initBoard();                               // 开局摆子
+    bool isOpponent(int r, int c, int p) const;     // 阵营判别
+    bool hasAnyCapture(int p) const;                // 全局必须吃子扫描
+    bool hasAnyMove(int p) const;                   // 全局死局检测
+    void applyEnergyShockwave(int r, int c);        // 被动技能：满能量吃子震荡波
+    void promote(int r, int c);                     // 经典规则：走到底线升王
+    void checkVictory();                            // 胜负裁判
 
-    // 核心修复点：新增一个带状态隔离的内部判断函数
-    // 允许在不破坏全局 mustCapture 状态的前提下，传入 currentMustCapture 进行沙盒预测
+    // 沙盒预测引擎：供 AI 平行宇宙推演用的内部验证器
     bool isValidMoveInternal(int r1, int c1, int r2, int c2, bool &isCap, bool &isSpecial, bool currentMustCapture) const;
+    // 局势打分系统：困难 AI 专属，给未来的棋盘战斗力打分
+    int evaluateBoard() const;
 };
 
 #endif // GAMEENGINE_H
