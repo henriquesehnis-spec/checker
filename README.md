@@ -1,11 +1,11 @@
-# 战术能量跳棋 Pro - 玉面手雷王降临版 (Tactical Energy Checkers Pro)
+# 战术能量跳棋 Pro -  (Tactical Energy Checkers Pro)
 
 ![C++](https://img.shields.io/badge/C++-17-blue.svg)
 ![Qt](https://img.shields.io/badge/Qt-6.0+-green.svg)
 ![Build](https://img.shields.io/badge/Build-CMake-orange)
 ![Architecture](https://img.shields.io/badge/Architecture-MVC-purple.svg)
 
-**战术能量跳棋 Pro** 是一款基于 C++ 17 与 Qt 6 框架开发的硬核桌面策略游戏。本作彻底颠覆了传统国际跳棋纯粹依赖位置计算的单一玩法，开创性地引入了 **“独立能量槽”**、**“战术身法”** 与 **“毁灭性大招”**。配合底层完全解耦的 **1-ply 沙盒推演 AI 大脑**，为您带来充满变数与视觉冲击的战场博弈体验。
+**战术能量跳棋 Pro** 是一款基于 C++ 17 与 Qt 6 框架开发的硬核桌面策略游戏。本作彻底颠覆了传统国际跳棋纯粹依赖位置计算的单一玩法，开创性地引入了 **“独立能量槽”**、**“战术身法”** 与 **“毁灭性大招”**。配合底层完全解耦的 **1-ply 沙盒推演 AI 大脑**，带来充满变数与视觉冲击的战场博弈体验。
 
 ---
 
